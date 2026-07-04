@@ -69,7 +69,7 @@
     text-align: center; line-height: 2; padding: 2rem;
   }
 
-  .page-inner { padding: 4rem 3rem; max-width: 900px; }
+  .page-inner { padding: 4rem 3rem; max-width: 1200px; width: 100%; }
   .page-title { font-family: var(--serif); font-size: 32px; font-weight: 400; color: var(--ink); margin-bottom: 0.5rem; }
   .page-subtitle { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 3rem; padding-bottom: 1rem; border-bottom: 1px solid var(--rule); }
 
@@ -90,10 +90,11 @@
     object-fit: cover; display: block;
     align-self: stretch;
   }
+  .card-footer { margin-top: 0.75rem; }
   .project-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 0.4rem; }
   .project-name { font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 0.6rem; line-height: 1.25; }
-  .project-desc { font-family: var(--serif); font-size: 12px; color: var(--ink-2); line-height: 1.7; flex: 1; }
-  .project-specs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.75rem; }
+  .project-desc { font-family: var(--serif); font-size: 13px; color: var(--ink-2); line-height: 1.7; flex: 1; }
+  .project-specs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
   .spec-pill { font-family: var(--mono); font-size: 10px; color: var(--ink-3); border: 1px solid var(--rule); padding: 3px 8px; }
   .project-arrow { position: absolute; bottom: 1.25rem; right: 1.25rem; font-family: var(--mono); font-size: 11px; color: var(--ink-3); opacity: 0; transition: opacity 0.15s; }
 
@@ -239,7 +240,7 @@
 <div id="page-activity" class="page">
   <div class="page-inner">
     <h1 class="page-title">What I've been up to</h1>
-    <p class="page-subtitle">Volunteering, events & community</p>
+    <p class="page-subtitle">volunteering, events & community</p>
     <div class="activity-list" id="activity-list"></div>
   </div>
   <footer>
@@ -264,6 +265,7 @@
 <div id="page-projects" class="page">
   <div class="page-inner">
     <h1 class="page-title">Projects</h1>
+    <p class="page-subtitle">a myriad of makes</p>
     <div class="projects-grid" id="projects-grid"></div>
   </div>
   <footer>
@@ -304,8 +306,10 @@
         <p class="exp-role">Applications Engineer</p>
         <ul class="exp-bullets">
           <li>Pre-silicon SerDes apps engineer: end-to-end customer support from SoW to tapeout</li>
-          <li>Debugging bringup simulations and supporting customer calls via JIRA</li>
-          <li>Power and performance derivation and prediction with systems team</li>
+          <li>Project management and customer support via JIRA tickets, regular calls</li>
+          <li>Debugging bringup simulations</li>
+          <li>Power and performance prediction in collaboration with the systems team</li>
+          <li>Documentation maintenance</li>
         </ul>
       </div>
     </div>
@@ -361,6 +365,7 @@
           <li>C</li>
           <li>Python</li>
           <li>MATLAB / Simulink</li>
+          <li>OpenCV</li>
           <li>ARM Assembly</li>
           <li>Unix / Linux</li>
         </ul>
@@ -370,6 +375,7 @@
         <ul class="skill-list">
           <li>FPGA (Quartus, Vivado)</li>
           <li>Arduino, ESP32</li>
+          <li>Raspberry Pi</li>
           <li>KiCad</li>
           <li>AutoCAD</li>
           <li>Fusion360</li>
@@ -447,9 +453,11 @@ function renderProjectsGrid() {
       <div class="card-body">
         <div class="card-text">
           <p class="project-desc">${desc}</p>
-          <div class="project-specs">${pills}</div>
         </div>
         ${thumb}
+      </div>
+      <div class="card-footer">
+        <div class="project-specs">${pills}</div>
       </div>
       <span class="project-arrow">View →</span>
     </div>`;
@@ -506,6 +514,7 @@ const projects = {
     title: 'Nash Equilibrium via Reinforcement Learning',
     date: 'Fall / Winter 2023 — Undergraduate Thesis (ESC499)',
     pills: ['Simulink', 'Reinforcement learning', 'Game theory', 'Multiagent systems'],
+    cardDesc: 'Undergraduate thesis supervised by Prof. Lacra Pavel. Implemented an RL model that converges to Nash Equilibrium in multiagent finite games.',
     body: `<p>Undergraduate thesis project supervised by Prof. Lacra Pavel at the University of Toronto.</p>
            <p>Implemented a Simulink model based on Bo et al.'s 2021 paper "On Passivity, Reinforcement Learning, and Higher Order Learning in Multiagent Finite Games." The model uses reinforcement learning to provably converge to true Nash Equilibrium in multiagent finite games.</p>`,
     placeholder: true
@@ -521,7 +530,7 @@ const projects = {
     placeholder: true
   },
   'cache-prefetch': {
-    tag: 'Computer Architecture · 1st in class',
+    tag: 'Computer Architecture',
     title: 'Cache Prefetching Algorithm',
     date: 'Fall 2023 — ECE552',
     pills: ['C', 'Cache architecture', 'Prefetching', 'Tag-correlating prefetcher'],
@@ -595,15 +604,17 @@ const projects = {
     body: `<p>Final project in APS360. My group tackled wheat head detection using the Global Wheat Head Detection (GWHD) dataset — a collection of wheat field photographs with bounding boxes annotated for each wheat head.</p>
            <p>As a baseline we used a plain CNN, then tested two enhanced architectures: contour + CNN and autoencoder + CNN. The contour approach used an OpenCV filter to enhance the wheat field images before feeding into the CNN. The autoencoder approach generated a mask of the wheat heads first, which was then fed back into the CNN.</p>
            <p>Models were evaluated by looking at a normal distribution of the RMS error. As expected, both enhanced models outperformed the baseline. On new data, the contour approach performed significantly better, and was thus our final pick of model.</p>`,
+    cardDesc: 'Designed a neural network to detect the number of wheat heads present in photos of wheat fields.',
     link: { text: 'View on GitHub ↗', url: 'https://github.com/CarbonicKevin/2020-Summer-APS360-Project' },
     pdf: { file: 'images/wheat-head/wheat-head-classification-brief-summary.pdf', label: 'Brief summary' },
     placeholder: true
   },
   'bridge': {
-    tag: 'Structural Engineering · Software',
+    tag: 'Structural Engineering',
     title: 'Bridge Design Project',
     date: 'Fall 2018 — CIV102',
     pills: ['Python', 'Structural analysis', 'Physical build', 'Matboard'],
+    cardDesc: 'Designed and built a matboard bridge capable of withstanding given static and dynamic loads.',
     body: `<p>In our first semester civil engineering course, we were put into groups of three and tasked with building a matboard bridge capable of withstanding both a dynamic and static load. The bridge was tested with a dynamic load of 400N first — a train traversing over the bridge — and then loaded to the point of failure with an increasing static load using a Baldwin testing machine. We were given one sheet of matboard, some glue, and a weight limit.</p>
            <p>Having just learned some programming skills, I put together a Python script to help with calculations and deciding what the bridge dimensions should be, by simulating both the static and dynamic loads on differently shaped hypothetical bridges.</p>
            <p>The actual building process took a weekend locked in a poorly-ventilated, glue-fume-infested dorm room with my teammate.</p>
@@ -616,14 +627,14 @@ const projects = {
 const activities = {
   'open-sauce': {
     tag: 'Jul 14–20, 2026',
-    title: 'Open Sauce',
+    title: 'Open Sauce 2026',
     note: 'Volunteering with Hack Club · San Francisco',
     body: `<p>Volunteering at Open Sauce, a hardware maker festival in San Francisco, as part of the Hack Club team.</p>`,
     placeholder: true
   },
   'isscc': {
     tag: 'Feb 2026',
-    title: 'ISSCC 2026',
+    title: 'ISSCC 2026 — Saratoga Group Volunteer',
     note: 'IEEE International Solid-State Circuits Conference',
     body: `<p>Volunteered with UofT's Saratoga group at ISSCC 2026, one of the premier venues for advances in solid-state circuits and systems-on-a-chip.</p>`,
     placeholder: true
@@ -788,22 +799,27 @@ function renderImages(id) {
 }
 
 function tryNextExt(id, n, extensions, extIndex, grid, section, onLoad) {
-  if (extIndex >= extensions.length) return; // nothing loaded for this slot
+  if (extIndex >= extensions.length) return;
   const ext = extensions[extIndex];
   const src = `images/${id}/${n}.${ext}`;
 
   if (ext === 'mp4') {
-    // For video, probe with a fetch HEAD request
-    fetch(src, { method: 'HEAD' })
-      .then(r => {
-        if (r.ok) {
-          appendVideo(src, grid);
-          onLoad();
-        } else {
-          tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad);
-        }
-      })
-      .catch(() => tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad));
+    // Render video element directly; use onerror to fall through to next ext
+    const vid = document.createElement('video');
+    vid.muted = true; vid.loop = true; vid.controls = true; vid.playsInline = true;
+    vid.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+    vid.onerror = () => tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad);
+    vid.oncanplay = () => {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display:flex;flex-direction:column';
+      const slot = document.createElement('div');
+      slot.className = 'photo-slot'; slot.style.aspectRatio = '16/9';
+      slot.appendChild(vid);
+      wrapper.appendChild(slot);
+      grid.appendChild(wrapper);
+      onLoad();
+    };
+    vid.src = src;
   } else {
     const img = new Image();
     img.onload = () => {
