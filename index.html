@@ -424,11 +424,10 @@ function renderProjectsGrid() {
   grid.innerHTML = projectOrder.map(id => {
     const p = projects[id];
     if (!p) return '';
-    const thumb = p.images && p.images.length > 0
-      ? `<img class="card-thumb" src="${p.images[0].src}" alt="${p.images[0].caption || p.title}" onerror="this.style.display='none'">`
-      : '';
+    // Thumb: attempt images/{id}/1.jpg, fallback to gif, hide if missing
+    const thumb = `<img class="card-thumb" src="images/${id}/1.jpg" alt=""
+      onerror="this.src='images/${id}/1.gif';this.onerror=function(){this.style.display='none'}">`;
     const pills = p.pills.map(t => `<span class="spec-pill">${t}</span>`).join('');
-    // Use cardDesc if set, otherwise strip HTML from first sentence of body
     const desc = p.cardDesc || p.body.replace(/<[^>]+>/g, '').split(/\.\s/)[0] + '.';
     return `<div class="project-card" onclick="showProject('${id}')">
       ${thumb}
@@ -447,13 +446,11 @@ function renderActivityList() {
   list.innerHTML = activityOrder.map(id => {
     const a = activities[id];
     if (!a) return '';
-    const hasThumb = a.images && a.images.length > 0;
-    const thumbHtml = hasThumb
-      ? `<img class="activity-row-thumb" src="${a.images[0].src}" alt="${a.images[0].caption || a.title}" onerror="this.style.display='none'">`
-      : '';
-    // Use listNote if set, otherwise first sentence of body
+    // Thumb: attempt images/{id}/1.jpg, hide if missing; row layout adapts via CSS
+    const thumbHtml = `<img class="activity-row-thumb" src="images/${id}/1.jpg" alt=""
+      onerror="this.src='images/${id}/1.gif';this.onerror=function(){this.style.display='none'}">`;
     const note = a.listNote || a.body.replace(/<[^>]+>/g, '').split(/\.\s/)[0] + '.';
-    return `<div class="activity-row${hasThumb ? ' has-thumb' : ''}" onclick="showActivity('${id}')">
+    return `<div class="activity-row" onclick="showActivity('${id}')">
       <span class="activity-row-date">${a.tag}</span>
       <span class="activity-row-name">${a.title}</span>
       <span class="activity-row-note">${note}</span>
@@ -504,6 +501,7 @@ const projects = {
     pills: ['FPGA', 'Verilog', 'Mechanical design', 'SD card interface'],
     body: `<p>Designed a spinning holographic display incorporating both mechanical and hardware components. An SD card containing image data was used as input, which was then read and translated into a visual display rendered by the spinning mechanism.</p>
            <p>The project was initially tested with an arduino but then implemented on an FPGA. The mechanical design, including a central slip ring, was all custom designed and built.</p>`,
+    pdf: { file: 'images/spinning-display/spinning-display-report-ng.pdf', label: 'Project report (individual contribution)' },
     placeholder: true
   },
   'cache-prefetch': {
@@ -580,8 +578,9 @@ const projects = {
     pills: ['Python', 'PyTorch', 'CNN', 'OpenCV', 'Computer vision'],
     body: `<p>Final project in APS360. My group tackled wheat head detection using the Global Wheat Head Detection (GWHD) dataset — a collection of wheat field photographs with bounding boxes annotated for each wheat head.</p>
            <p>As a baseline we used a plain CNN, then tested two enhanced architectures: contour + CNN and autoencoder + CNN. The contour approach used an OpenCV filter to enhance the wheat field images before feeding into the CNN. The autoencoder approach generated a mask of the wheat heads first, which was then fed back into the CNN.</p>
-           <p>Models were evaluated by looking at a normal distribution of the RMS error. As expected, both enhanced models outperformed the baseline. On new data, the contour approach performed significantly better.</p>`,
+           <p>Models were evaluated by looking at a normal distribution of the RMS error. As expected, both enhanced models outperformed the baseline. On new data, the contour approach performed significantly better, and was thus our final pick of model.</p>`,
     link: { text: 'View on GitHub ↗', url: 'https://github.com/CarbonicKevin/2020-Summer-APS360-Project' },
+    pdf: { file: 'images/wheat-head/wheat-head-classification-brief-summary.pdf', label: 'Brief summary' },
     placeholder: true
   },
   'bridge': {
@@ -592,7 +591,7 @@ const projects = {
     body: `<p>In our first semester civil engineering course, we were put into groups of three and tasked with building a matboard bridge capable of withstanding both a dynamic and static load. The bridge was tested with a dynamic load of 400N first — a train traversing over the bridge — and then loaded to the point of failure with an increasing static load using a Baldwin testing machine. We were given one sheet of matboard, some glue, and a weight limit.</p>
            <p>Having just learned some programming skills, I put together a Python script to help with calculations and deciding what the bridge dimensions should be, by simulating both the static and dynamic loads on differently shaped hypothetical bridges.</p>
            <p>The actual building process took a weekend locked in a poorly-ventilated, glue-fume-infested dorm room with my teammate.</p>
-           <p>My one regret is that we ran out of matboard and didn't add one last diaphragm — which was exactly the location where our bridge ended up failing at 753N. The diaphragm would have prevented the twisting.</p>`,
+           <p>My one regret is that we ran out of matboard and didn't add one last diaphragm — which was exactly the location where our bridge ended up failing at 753N. The diaphragm would have braced the flanges and prevented the twisting.</p>`,
     placeholder: true
   }
 };
@@ -615,7 +614,7 @@ const activities = {
   },
   'newhacks-2025': {
     tag: 'Oct 25–26, 2025',
-    title: 'NewHacks 2025',
+    title: 'NewHacks 2025 — Volunteer',
     note: 'Mentor & Judge — IEEE UofT',
     body: `<p>Volunteered as a mentor and judge at IEEE UofT's NewHacks, a hackathon targeted towards students getting their first hackathon experience.</p>
            <p>Also coordinated a volunteer group from Alphawave Semi to participate.</p>`,
@@ -623,50 +622,50 @@ const activities = {
   },
   'york-industry': {
     tag: 'Sept 24, 2025',
-    title: 'York University Industry Night',
+    title: 'York University Industry Night — Volunteer',
     note: 'Representing Alphawave Semi',
     body: `<p>Represented Alphawave Semi at York University's Industry Night, connecting with students interested in careers in semiconductor and hardware engineering.</p>`,
     placeholder: true
   },
   'tiny-tapeout': {
     tag: 'Oct 19, 2025',
-    title: 'Tiny Tapeout',
-    note: 'Volunteer',
+    title: 'Tiny Tapeout — Volunteer',
+    note: 'Chip design education for high school students',
     body: `<p>Volunteered at Tiny Tapeout, delivering chip design education for high school students. Tiny Tapeout is an open-source initiative that makes it easy and affordable for anyone to design and fabricate custom chips.</p>`,
     placeholder: true
   },
   'hack-club': {
     tag: 'Oct 18, 2025',
-    title: 'Hack Club',
-    note: 'Volunteer',
+    title: 'PCB Workshop — Volunteer with Hack Club',
+    note: 'PCB workshop for high school students',
     body: `<p>Ran a PCB design workshop for high school students as part of a Hack Club event.</p>`,
     placeholder: true
   },
   'tech-interview-night': {
     tag: 'Sept 15, 2025',
-    title: 'Technical Interview Night',
-    note: 'Mock Interviewer — IEEE UofT',
+    title: 'Technical Interview Night — Volunteer',
+    note: 'Mock interviewer — IEEE UofT',
     body: `<p>Volunteered as a mock interviewer at IEEE UofT's Technical Interview Night, an event that gives students the opportunity to practice technical interviews and receive resume feedback from industry professionals.</p>`,
     placeholder: true
   },
   'ieee-yp': {
     tag: 'Jan 2025 – Present',
-    title: 'IEEE Young Professionals Toronto',
-    note: 'Co-Chair — Outstanding New Leader Award 2025',
+    title: 'IEEE Young Professionals Toronto — YP Committee Member',
+    note: 'Outstanding New Leader Award 2025',
     body: `<p>Serving on the IEEE Toronto Young Professionals committee, planning and running events for early-career engineers in the Toronto area.</p>
            <p>Recognized with the Outstanding New Leader Award in 2025.</p>`,
     placeholder: true
   },
   'makeuoft-2025': {
     tag: '2025',
-    title: 'MakeUofT 2025',
-    note: 'Volunteer organizer',
+    title: 'MakeUofT 2025 — Volunteer',
+    note: 'Coordinated Alphawave Semi volunteers, ran Arduino workshop',
     body: `<p>Coordinated volunteers from Alphawave Semi and ran an Arduino workshop at MakeUofT, one of Canada's largest hardware hackathons.</p>`,
     placeholder: true
   },
   'newhacks-2024': {
     tag: 'Oct 26–27, 2024',
-    title: 'NewHacks 2024',
+    title: 'NewHacks 2024 — Volunteer',
     note: 'Mentor & Judge — IEEE UofT',
     body: `<p>Volunteered as a mentor and judge at IEEE UofT's NewHacks, a hackathon targeted towards students getting their first hackathon experience.</p>
            <p>Also coordinated a volunteer group from Alphawave Semi to participate.</p>`,
@@ -674,22 +673,22 @@ const activities = {
   },
   'makeuoft-2023': {
     tag: 'Feb 18–19, 2023',
-    title: 'MakeUofT 2023',
-    note: 'Volunteer mentor and judge',
+    title: 'MakeUofT 2023 — Volunteer',
+    note: 'Mentor and judge',
     body: `<p>Volunteered at MakeUofT 2023 as a mentor and judge.</p>`,
     placeholder: true
   },
   'makeuoft-2022': {
     tag: 'Feb 19–20, 2022',
-    title: 'MakeUofT 2022',
-    note: 'Participant — E-Face project',
+    title: 'MakeUofT 2022 — Participant',
+    note: 'E-Face project',
     body: `<p>Participated in MakeUofT 2022 with the E-Face project — a mask capable of displaying various emotions with integrated fans to filter air within the mask.</p>`,
     link: { text: 'View on Devpost ↗', url: 'https://devpost.com/software/eface' },
     placeholder: true
   },
   'designathon-2022': {
     tag: 'Feb 4–6, 2022',
-    title: 'UofT Designathon 2022',
+    title: 'UofT Designathon 2022 — Participant',
     note: 'Participant',
     body: `<p>Participated in UofT's Designathon 2022. Our project was to design a mug capable of holding and dispensing both hot and cold liquids.</p>`,
     placeholder: true
@@ -707,8 +706,8 @@ function showActivity(id) {
     <div class="detail-body" style="margin-top:1.5rem">${a.body}</div>
   `;
   if (a.link) html += `<p class="detail-link"><a href="${a.link.url}" target="_blank">${a.link.text}</a></p>`;
-  if (a.placeholder) html += `<div class="detail-placeholder"><strong>Add more detail</strong>Add a writeup or links. To add photos, upload them to images/ in your GitHub repo and add their filenames to the images array for this entry in the HTML.</div>`;
-  html += renderImages(a.images, id, 'activity');
+  html += renderImages(id);
+  html += renderPdfLink(id);
 
   document.getElementById('activity-content').innerHTML = html;
   document.getElementById('activity-back-btn').onclick = () => showPage('activity');
@@ -731,8 +730,8 @@ function showProject(id) {
     <div class="detail-body">${p.body}</div>
   `;
   if (p.link) html += `<p class="detail-link"><a href="${p.link.url}" target="_blank">${p.link.text}</a></p>`;
-  if (p.placeholder) html += `<div class="detail-placeholder"><strong>Add more detail</strong>To add photos, upload them to images/ in your GitHub repo and add their filenames to the images array for this entry in the HTML.</div>`;
-  html += renderImages(p.images, id, 'project');
+  html += renderImages(id);
+  html += renderPdfLink(id);
 
   document.getElementById('project-content').innerHTML = html;
   document.getElementById('detail-back-btn').onclick = () => showPage('projects');
@@ -741,19 +740,103 @@ function showProject(id) {
   window.scrollTo(0, 0);
 }
 
-// Renders a static photo grid from an images array like:
-// images: [{ src: 'images/ev-robot-1.jpg', caption: 'The rover baseplate' }, ...]
-function renderImages(images, id, type) {
-  if (!images || images.length === 0) return '';
-  let html = `<div class="detail-photos"><p class="detail-photos-label">Photos</p><div class="photo-grid">`;
-  images.forEach(img => {
-    html += `<div style="display:flex;flex-direction:column">
-      <div class="photo-slot"><img src="${img.src}" alt="${img.caption || ''}"></div>
-      ${img.caption ? `<p style="font-family:var(--mono);font-size:11px;color:var(--ink-3);padding:6px 0;border-bottom:1px solid var(--rule)">${img.caption}</p>` : ''}
-    </div>`;
-  });
-  html += `</div></div>`;
+// Auto-loads images/gif/video from images/{id}/1.jpg|gif|mp4 ... 10.jpg|gif|mp4
+// Only shows the Photos section if at least one file loads successfully.
+function renderImages(id) {
+  const extensions = ['jpg', 'gif', 'mp4'];
+  const slots = Array.from({length: 10}, (_, i) => i + 1);
+  const gridId = `img-grid-${id}`;
+  const sectionId = `img-section-${id}`;
+
+  let html = `<div class="detail-photos" id="${sectionId}" style="display:none">
+    <p class="detail-photos-label">Photos & video</p>
+    <div class="photo-grid" id="${gridId}"></div>
+  </div>`;
+
+  setTimeout(() => {
+    const grid = document.getElementById(gridId);
+    const section = document.getElementById(sectionId);
+    if (!grid || !section) return;
+
+    let loaded = 0;
+    // Try each slot number, check each extension in order, use first that loads
+    slots.forEach(n => {
+      tryNextExt(id, n, extensions, 0, grid, section, () => {
+        loaded++;
+        if (loaded === 1) section.style.display = '';
+      });
+    });
+  }, 0);
+
   return html;
+}
+
+function tryNextExt(id, n, extensions, extIndex, grid, section, onLoad) {
+  if (extIndex >= extensions.length) return; // nothing loaded for this slot
+  const ext = extensions[extIndex];
+  const src = `images/${id}/${n}.${ext}`;
+
+  if (ext === 'mp4') {
+    // For video, probe with a fetch HEAD request
+    fetch(src, { method: 'HEAD' })
+      .then(r => {
+        if (r.ok) {
+          appendVideo(src, grid);
+          onLoad();
+        } else {
+          tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad);
+        }
+      })
+      .catch(() => tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad));
+  } else {
+    const img = new Image();
+    img.onload = () => {
+      appendImg(src, grid);
+      onLoad();
+    };
+    img.onerror = () => tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad);
+    img.src = src;
+  }
+}
+
+function appendImg(src, grid) {
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'display:flex;flex-direction:column';
+  const slot = document.createElement('div');
+  slot.className = 'photo-slot';
+  const img = document.createElement('img');
+  img.src = src; img.alt = '';
+  slot.appendChild(img);
+  wrapper.appendChild(slot);
+  grid.appendChild(wrapper);
+}
+
+// Renders a PDF link if the project/activity data has a pdf field
+// e.g. pdf: { file: 'images/spinning-display/spinning-display-report-ng.pdf', label: 'Project report (individual contribution)' }
+function renderPdfLink(id) {
+  const entry = projects[id] || activities[id];
+  if (!entry || !entry.pdf) return '';
+  return `<p class="detail-link">
+    <a href="${entry.pdf.file}" target="_blank">${entry.pdf.label} (PDF) ↗</a>
+  </p>`;
+}
+
+function appendVideo(src, grid) {
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'display:flex;flex-direction:column';
+  const slot = document.createElement('div');
+  slot.className = 'photo-slot';
+  slot.style.aspectRatio = '16/9';
+  const vid = document.createElement('video');
+  vid.src = src;
+  vid.controls = true;
+  vid.muted = true;
+  vid.loop = true;
+  vid.playsInline = true;
+  vid.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+  slot.appendChild(vid);
+  wrapper.appendChild(slot);
+  grid.appendChild(wrapper);
 }
 
 function showHome() {
