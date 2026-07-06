@@ -77,10 +77,16 @@
   .project-card:hover { background: var(--paper-2); }
   .project-card:hover .project-arrow { opacity: 1; }
   .card-header { margin-bottom: 0.75rem; }
-  .card-body { display: flex; gap: 1rem; align-items: flex-start; }
-  .card-text { flex: 1; min-width: 0; }
+  .card-body {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 1rem;
+    flex: 1;
+  }
+  .card-body.no-thumb { grid-template-columns: 1fr; }
+  .card-text { min-width: 0; overflow: hidden; }
   .card-thumb {
-    width: 120px; height: 120px; flex-shrink: 0;
+    width: 120px; height: 100%; min-height: 80px;
     object-fit: cover; display: block;
   }
   .card-footer { margin-top: 0.75rem; }
@@ -429,10 +435,10 @@ function renderProjectsGrid() {
   grid.innerHTML = projectOrder.map(id => {
     const p = projects[id];
     if (!p) return '';
-    const thumb = `<img class="card-thumb" src="images/${id}/1.jpg" alt=""
-      onerror="this.src='images/${id}/1.gif';this.onerror=function(){this.remove()}">`;
     const pills = p.pills.map(t => `<span class="spec-pill">${t}</span>`).join('');
     const desc = p.cardDesc || p.body.replace(/<[^>]+>/g, '').split(/\.\s/)[0] + '.';
+    const thumb = `<img class="card-thumb" src="images/${id}/1.jpg" alt=""
+      onerror="this.src='images/${id}/1.gif';this.onerror=function(){this.parentElement.classList.add('no-thumb');this.remove()}">`;
     return `<div class="project-card" onclick="showProject('${id}')">
       <div class="card-header">
         <p class="project-tag">${p.tag}</p>
@@ -721,8 +727,8 @@ function showActivity(id) {
     <div class="detail-body" style="margin-top:1.5rem">${a.body}</div>
   `;
   if (a.link) html += `<p class="detail-link"><a href="${a.link.url}" target="_blank">${a.link.text}</a></p>`;
-  html += renderImages(id);
   html += renderPdfLink(id);
+  html += renderImages(id);
 
   document.getElementById('activity-content').innerHTML = html;
   document.getElementById('activity-back-btn').onclick = () => showPage('activity');
@@ -745,8 +751,8 @@ function showProject(id) {
     <div class="detail-body">${p.body}</div>
   `;
   if (p.link) html += `<p class="detail-link"><a href="${p.link.url}" target="_blank">${p.link.text}</a></p>`;
-  html += renderImages(id);
   html += renderPdfLink(id);
+  html += renderImages(id);
 
   document.getElementById('project-content').innerHTML = html;
   document.getElementById('detail-back-btn').onclick = () => showPage('projects');
@@ -755,13 +761,12 @@ function showProject(id) {
   window.scrollTo(0, 0);
 }
 
-// Auto-loads images/gif/video from images/{id}/1.jpg|gif|mp4 ... 10.jpg|gif|mp4
-// Only shows the Photos section if at least one file loads successfully.
+// Auto-loads images/gif/video from images/{id}/1–10.jpg|gif|mp4
+// Pre-creates ordered slots so media always appears left-to-right as 1, 2, 3...
 function renderImages(id) {
   const extensions = ['jpg', 'gif', 'mp4'];
-  const slots = Array.from({length: 10}, (_, i) => i + 1);
-  const gridId = `img-grid-${id}`;
   const sectionId = `img-section-${id}`;
+  const gridId = `img-grid-${id}`;
 
   let html = `<div class="detail-photos" id="${sectionId}" style="display:none">
     <p class="detail-photos-label">Photos & video</p>
@@ -773,66 +778,81 @@ function renderImages(id) {
     const section = document.getElementById(sectionId);
     if (!grid || !section) return;
 
-    let loaded = 0;
-    // Try each slot number, check each extension in order, use first that loads
-    slots.forEach(n => {
-      tryNextExt(id, n, extensions, 0, grid, section, () => {
-        loaded++;
-        if (loaded === 1) section.style.display = '';
-      });
-    });
+    for (let n = 1; n <= 10; n++) {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display:none;flex-direction:column';
+      wrapper.id = `slot-${id}-${n}`;
+      grid.appendChild(wrapper);
+      tryNextExtOrdered(id, n, extensions, 0, wrapper, section);
+    }
   }, 0);
 
   return html;
 }
 
-function tryNextExt(id, n, extensions, extIndex, grid, section, onLoad) {
+function tryNextExtOrdered(id, n, extensions, extIndex, wrapper, section) {
   if (extIndex >= extensions.length) return;
   const ext = extensions[extIndex];
   const src = `images/${id}/${n}.${ext}`;
 
   if (ext === 'mp4') {
-    // Render video element directly; use onerror to fall through to next ext
     const vid = document.createElement('video');
     vid.muted = true; vid.loop = true; vid.controls = true; vid.playsInline = true;
     vid.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-    vid.onerror = () => tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad);
+    vid.onerror = () => tryNextExtOrdered(id, n, extensions, extIndex + 1, wrapper, section);
     vid.oncanplay = () => {
-      const wrapper = document.createElement('div');
-      wrapper.style.cssText = 'display:flex;flex-direction:column';
       const slot = document.createElement('div');
       slot.className = 'photo-slot'; slot.style.aspectRatio = '16/9';
       slot.appendChild(vid);
       wrapper.appendChild(slot);
-      grid.appendChild(wrapper);
-      onLoad();
+      wrapper.style.display = 'flex';
+      section.style.display = '';
     };
     vid.src = src;
   } else {
     const img = new Image();
     img.onload = () => {
-      appendImg(src, grid);
-      onLoad();
+      const slot = document.createElement('div');
+      slot.className = 'photo-slot'; slot.style.cursor = 'zoom-in';
+      const i = document.createElement('img');
+      i.src = src; i.alt = '';
+      i.style.cssText = 'width:100%;height:100%;object-fit:cover';
+      slot.onclick = () => openLightbox(src, 'img');
+      slot.appendChild(i);
+      wrapper.appendChild(slot);
+      wrapper.style.display = 'flex';
+      section.style.display = '';
     };
-    img.onerror = () => tryNextExt(id, n, extensions, extIndex + 1, grid, section, onLoad);
+    img.onerror = () => tryNextExtOrdered(id, n, extensions, extIndex + 1, wrapper, section);
     img.src = src;
   }
 }
 
-function appendImg(src, grid) {
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = 'display:flex;flex-direction:column';
-  const slot = document.createElement('div');
-  slot.className = 'photo-slot';
-  const img = document.createElement('img');
-  img.src = src; img.alt = '';
-  slot.appendChild(img);
-  wrapper.appendChild(slot);
-  grid.appendChild(wrapper);
+// ── LIGHTBOX ──
+function openLightbox(src, type) {
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lb-img');
+  const lbVid = document.getElementById('lb-vid');
+  if (type === 'img') {
+    lbImg.src = src; lbImg.style.display = 'block';
+    lbVid.style.display = 'none'; lbVid.src = '';
+  } else {
+    lbVid.src = src; lbVid.style.display = 'block';
+    lbImg.style.display = 'none'; lbImg.src = '';
+  }
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  lb.style.display = 'none';
+  document.getElementById('lb-img').src = '';
+  document.getElementById('lb-vid').src = '';
+  document.body.style.overflow = '';
 }
 
 // Renders a PDF link if the project/activity data has a pdf field
-// e.g. pdf: { file: 'images/spinning-display/spinning-display-report-ng.pdf', label: 'Project report (individual contribution)' }
 function renderPdfLink(id) {
   const entry = projects[id] || activities[id];
   if (!entry || !entry.pdf) return '';
@@ -845,15 +865,12 @@ function appendVideo(src, grid) {
   const wrapper = document.createElement('div');
   wrapper.style.cssText = 'display:flex;flex-direction:column';
   const slot = document.createElement('div');
-  slot.className = 'photo-slot';
-  slot.style.aspectRatio = '16/9';
+  slot.className = 'photo-slot'; slot.style.aspectRatio = '16/9';
+  slot.style.cursor = 'zoom-in';
   const vid = document.createElement('video');
-  vid.src = src;
-  vid.controls = true;
-  vid.muted = true;
-  vid.loop = true;
-  vid.playsInline = true;
+  vid.src = src; vid.controls = true; vid.muted = true; vid.loop = true; vid.playsInline = true;
   vid.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+  slot.onclick = (e) => { if (e.target !== vid) openLightbox(src, 'vid'); };
   slot.appendChild(vid);
   wrapper.appendChild(slot);
   grid.appendChild(wrapper);
@@ -868,5 +885,11 @@ function showHome() {
 renderProjectsGrid();
 renderActivityList();
 </script>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;cursor:zoom-out;">
+  <img id="lb-img" src="" alt="" style="max-width:92vw;max-height:92vh;object-fit:contain;display:none;">
+  <video id="lb-vid" src="" controls autoplay style="max-width:92vw;max-height:92vh;display:none;"></video>
+</div>
 </body>
 </html>
