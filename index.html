@@ -60,14 +60,8 @@
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  .photo-container { width: 100%; height: 100%; position: relative; background: var(--paper-2); }
+  .photo-container { width: 100%; height: 100%; position: relative; background: var(--paper); }
   .photo-container img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
-  .photo-placeholder {
-    display: none; width: 100%; height: 100%; min-height: 400px;
-    align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
-    text-align: center; line-height: 2; padding: 2rem;
-  }
 
   .page-inner { padding: 4rem 3rem; max-width: 1200px; width: 100%; }
   .page-title { font-family: var(--serif); font-size: 32px; font-weight: 400; color: var(--ink); margin-bottom: 0.5rem; }
@@ -78,22 +72,21 @@
   .project-card {
     background: var(--paper); padding: 1.75rem; transition: background 0.15s;
     cursor: pointer; position: relative;
-    display: flex; flex-direction: column; min-height: 260px;
+    display: flex; flex-direction: column;
   }
   .project-card:hover { background: var(--paper-2); }
   .project-card:hover .project-arrow { opacity: 1; }
   .card-header { margin-bottom: 0.75rem; }
-  .card-body { display: flex; gap: 1rem; flex: 1; min-height: 0; }
-  .card-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .card-body { display: flex; gap: 1rem; align-items: flex-start; }
+  .card-text { flex: 1; min-width: 0; }
   .card-thumb {
-    width: 120px; flex-shrink: 0;
+    width: 120px; height: 120px; flex-shrink: 0;
     object-fit: cover; display: block;
-    align-self: stretch;
   }
   .card-footer { margin-top: 0.75rem; }
   .project-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 0.4rem; }
   .project-name { font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 0.6rem; line-height: 1.25; }
-  .project-desc { font-family: var(--serif); font-size: 13px; color: var(--ink-2); line-height: 1.7; flex: 1; }
+  .project-desc { font-family: var(--serif); font-size: 13px; color: var(--ink-2); line-height: 1.7; }
   .project-specs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
   .spec-pill { font-family: var(--mono); font-size: 10px; color: var(--ink-3); border: 1px solid var(--rule); padding: 3px 8px; }
   .project-arrow { position: absolute; bottom: 1.25rem; right: 1.25rem; font-family: var(--mono); font-size: 11px; color: var(--ink-3); opacity: 0; transition: opacity 0.15s; }
@@ -221,12 +214,7 @@
     </div>
     <div class="landing-right">
       <div class="photo-container">
-        <!-- Replace the src below with images/your-photo.jpg once uploaded to GitHub -->
-        <img src="images/profile.jpg" alt="Nikoo Givehchian"
-             onerror="this.style.display='none'; this.parentElement.querySelector('.photo-placeholder').style.display='flex'">
-        <div class="photo-placeholder">
-          <span>Add images/profile.jpg<br>to your GitHub repo</span>
-        </div>
+        <img src="images/profile.jpg" alt="Nikoo Givehchian" onerror="this.style.display='none'">
       </div>
     </div>
   </div>
